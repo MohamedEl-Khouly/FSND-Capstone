@@ -157,4 +157,5 @@ Thumbs.db #thumbnail cache on Windows
 !.vscode/extensions.json
 *.code-workspace
 
-# End of https://www.toptal.com/developers/gitignore/api/flask,vscode
+# enviroment variables
+setup.sh
