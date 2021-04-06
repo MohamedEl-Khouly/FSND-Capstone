@@ -8,6 +8,19 @@ from database.models import setup_db, Actor, Movie
 #from auth.auth import AuthError, requires_auth
 
 # ----------------------------------------------------------------------------#
+# Constants & Helper methods
+# ----------------------------------------------------------------------------#
+ITEMS_PER_PAGE = int(os.environ.get('ITEMS_PER_PAGE'))
+
+
+def paginate(request, selection):
+
+    page = request.args.get('page', 1, type=int)
+    start = (page - 1) * ITEMS_PER_PAGE
+    end = start + ITEMS_PER_PAGE
+    return selection[start:end]
+
+# ----------------------------------------------------------------------------#
 # Create & Configure App
 # ----------------------------------------------------------------------------#
 
@@ -69,10 +82,12 @@ def create_app(test_config=None):
         actors = Actor.query.order_by(Actor.id).all()
         if actors is None:
             abort(404)
-        formated_actors = [actor.format() for actor in actors]
+        current_actors = paginate(request, actors)
+        formated_actors = [actor.format() for actor in current_actors]
         return jsonify({
             'success': True,
-            'actors': formated_actors
+            'actors': formated_actors,
+            'total_actors': len(actors)
         })
         # POST
 
@@ -160,10 +175,12 @@ def create_app(test_config=None):
         movies = Movie.query.order_by(Movie.id).all()
         if movies is None:
             abort(404)
-        formated_movies = [movie.format() for movie in movies]
+        current_movies = paginate(request, movies)
+        formated_movies = [movie.format() for movie in current_movies]
         return jsonify({
             'success': True,
-            'movies': formated_movies
+            'movies': formated_movies,
+            'total_movies': len(movies)
         })
 
         # POST
