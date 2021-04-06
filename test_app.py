@@ -13,8 +13,8 @@ class CastingTestCase(unittest.TestCase):
         """Define test variables and initialize app."""
         self.app = create_app()
         self.client = self.app.test_client
-        self.database_user = 'serag'
-        self.database_pass = 'password1'
+        self.database_user = os.environ.get('DATABASE_USER')
+        self.database_pass = os.environ.get('DATABASE_PASSWORD')
         self.database_name = "casting_test"
         self.database_path = "postgresql://{}:{}@{}/{}".format(
             self.database_user, self.database_pass,
