@@ -3,7 +3,7 @@ import unittest
 import json
 from flask_sqlalchemy import SQLAlchemy
 from app import create_app
-from database.models import setup_db
+from database.models import setup_db, db_drop_and_create_all
 
 
 class CastingTestCase(unittest.TestCase):
@@ -33,6 +33,7 @@ class CastingTestCase(unittest.TestCase):
         }
 
         setup_db(self.app, self.database_path)
+        db_drop_and_create_all()
 
         # binds the app to the current context
         with self.app.app_context():
