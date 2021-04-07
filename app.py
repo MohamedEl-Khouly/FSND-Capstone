@@ -72,7 +72,7 @@ def create_app(test_config=None):
         # Auth
     @app.route('/auth', methods=['GET'])
     def authentication_request():
-        url = f'https://${DOMAIN}/authorize?audience=${AUDIENCE}&response_type=token&client_id=${CLIENT_ID}&redirect_uri=${CALLBACK_URI}'
+        url = f'https://{DOMAIN}/authorize?audience={AUDIENCE}&response_type=token&client_id={CLIENT_ID}&redirect_uri={CALLBACK_URI}'
         return jsonify({
             'url': url
         })
