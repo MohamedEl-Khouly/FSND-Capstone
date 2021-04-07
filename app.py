@@ -5,7 +5,7 @@ import os
 from flask import Flask, request, abort, jsonify
 from flask_cors import CORS
 from database.models import setup_db, Actor, Movie
-#from auth.auth import AuthError, requires_auth
+from auth.auth import AuthError, requires_auth
 
 # ----------------------------------------------------------------------------#
 # Constants & Helper methods
@@ -57,7 +57,6 @@ def create_app(test_config=None):
 #  ----------------------------------------------------------------
 
         # Index
-
 
     @app.route('/', methods=['GET'])
     def index():
@@ -169,7 +168,6 @@ def create_app(test_config=None):
 
         # GET
 
-
     @app.route('/movies')
     def get_movies():
         movies = Movie.query.order_by(Movie.id).all()
@@ -254,6 +252,7 @@ def create_app(test_config=None):
 # ----------------------------------------------------------------------------#
     # 1. 400
 
+
     @app.errorhandler(400)
     def bad_request(error):
         return jsonify({
@@ -279,6 +278,15 @@ def create_app(test_config=None):
             'error': 422,
             'message': "REQUEST UNPROCESSABLE"
         }), 422
+
+    # 4. AuthError
+    @app.errorhandler(AuthError)
+    def authentication_failed(error):
+        return jsonify({
+            'success': False,
+            'error': error.status_code,
+            "description": error.error['description'],
+        }), error.status_code
 
     return app
 
