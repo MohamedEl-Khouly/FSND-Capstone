@@ -15,7 +15,7 @@ from flask_migrate import Migrate
 # ----------------------------------------------------------------------------#
 # Setup.
 # ----------------------------------------------------------------------------#
-database_path = os.environ.get('DATABASE_PATH')
+database_path = os.environ.get('DATABASE_URL')
 
 db = SQLAlchemy()
 migrate = Migrate()
