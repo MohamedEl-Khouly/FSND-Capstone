@@ -95,7 +95,7 @@ def check_permissions(permission, payload):
         raise AuthError({
             'code': 'unauthorized',
             'description': 'Action is not permetted'
-        }, 403)
+        }, 401)
     return True
 
 
