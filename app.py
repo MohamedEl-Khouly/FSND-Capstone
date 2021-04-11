@@ -2,9 +2,19 @@
 # Imports
 # ----------------------------------------------------------------------------#
 import os
-from flask import Flask, request, abort, jsonify
+from flask import (
+    Flask,
+    request,
+    abort,
+    jsonify
+)
 from flask_cors import CORS
-from database.models import setup_db, Actor, Movie
+from database.models import (
+    setup_db,
+    Actor,
+    Movie,
+    db
+)
 from auth.auth import AuthError, requires_auth
 
 # ----------------------------------------------------------------------------#
@@ -94,7 +104,8 @@ def create_app(test_config=None):
             'actors': formated_actors,
             'total_actors': len(actors)
         })
-        # POST
+
+    # POST
 
     @app.route('/actors', methods=['POST'])
     @requires_auth('post:actors')
@@ -107,8 +118,14 @@ def create_app(test_config=None):
         gender = body.get('gender', None)
         if name is None or age is None or gender is None:
             abort(422)
-        actor = Actor(name=name, age=age, gender=gender)
-        actor.insert()
+        try:
+            actor = Actor(name=name, age=age, gender=gender)
+            actor.insert()
+        except:
+            db.session.rollback()
+            abort(500)
+        finally:
+            db.session.close()
         return jsonify({
             'success': True,
             'actor': actor.format()
@@ -117,7 +134,7 @@ def create_app(test_config=None):
         # PATCH
     @app.route('/actors/<int:actor_id>', methods=['PATCH'])
     @requires_auth('patch:actors')
-    def edit_actor(jwt,actor_id):
+    def edit_actor(jwt, actor_id):
         actor = Actor.query.filter(Actor.id == actor_id).one_or_none()
 
         if actor is None:
@@ -127,30 +144,36 @@ def create_app(test_config=None):
         if not('name' in body or 'age' in body or 'gender' in body or 'movies' in body):
             abort(400)
 
-        if 'name' in body:
-            name = body.get('name', None)
-            if name is None:
-                abort(422)
-            actor.name = name
-        if 'age' in body:
-            age = body.get('age', None)
-            if age is None:
-                abort(422)
-            actor.age = age
-        if 'gender' in body:
-            gender = body.get('gender', None)
-            if gender is None:
-                abort(422)
-            actor.gender = gender
-        if 'movies' in body:
-            movie_id = body.get('movies', None)
-            if movie_id is None:
-                abort(422)
-            movie = Movie.query.filter(Movie.id == movie_id).one_or_none()
-            if movie is None:
-                abort(400)
-            actor.movies.append(movie)
-        actor.update()
+        try:
+            if 'name' in body:
+                name = body.get('name', None)
+                if name is None:
+                    abort(422)
+                actor.name = name
+            if 'age' in body:
+                age = body.get('age', None)
+                if age is None:
+                    abort(422)
+                actor.age = age
+            if 'gender' in body:
+                gender = body.get('gender', None)
+                if gender is None:
+                    abort(422)
+                actor.gender = gender
+            if 'movies' in body:
+                movie_id = body.get('movies', None)
+                if movie_id is None:
+                    abort(422)
+                movie = Movie.query.filter(Movie.id == movie_id).one_or_none()
+                if movie is None:
+                    abort(400)
+                actor.movies.append(movie)
+            actor.update()
+        except:
+            db.session.rollback()
+            abort(500)
+        finally:
+            db.session.close()
         return jsonify({
             'success': True,
             'actor': actor.format()
@@ -159,13 +182,18 @@ def create_app(test_config=None):
         # DELETE
     @app.route('/actors/<int:actor_id>', methods=['DELETE'])
     @requires_auth('delete:actors')
-    def delete_actor(jwt,actor_id):
+    def delete_actor(jwt, actor_id):
         actor = Actor.query.filter(Actor.id == actor_id).one_or_none()
 
         if actor is None:
             abort(404)
-
-        actor.delete()
+        try:
+            actor.delete()
+        except:
+            db.session.rollback()
+            abort(500)
+        finally:
+            db.session.close()
         return jsonify({
             'success': True,
             'deleted': actor_id
@@ -192,7 +220,8 @@ def create_app(test_config=None):
             'total_movies': len(movies)
         })
 
-        # POST
+    # POST
+
     @app.route('/movies', methods=["POST"])
     @requires_auth('post:movies')
     def new_movie(jwt):
@@ -201,8 +230,14 @@ def create_app(test_config=None):
             abort(400)
         title = body.get('title')
         release_date = body.get('release_date')
-        movie = Movie(title=title, release_date=release_date)
-        movie.insert()
+        try:
+            movie = Movie(title=title, release_date=release_date)
+            movie.insert()
+        except:
+            db.session.rollback()
+            abort(500)
+        finally:
+            db.session.close()
         return jsonify({
             'success': True,
             'movie': movie.format()
@@ -211,7 +246,7 @@ def create_app(test_config=None):
 
     @app.route('/movies/<int:movie_id>', methods=['PATCH'])
     @requires_auth('patch:movies')
-    def edit_movie(jwt,movie_id):
+    def edit_movie(jwt, movie_id):
         movie = Movie.query.filter(Movie.id == movie_id).one_or_none()
 
         if movie is None:
@@ -221,24 +256,29 @@ def create_app(test_config=None):
 
         if not('title' in body or 'release_date' in body or 'actors' in body):
             abort(400)
-
-        if ('title' in body):
-            title = body.get('title', None)
-            if title is None:
-                abort(422)
-            movie.title = title
-        if ('release_date' in body):
-            release_date = body.get('release_date', None)
-            if release_date is None:
-                abort(422)
-            movie.release_date = release_date
-        if ('actors' in body):
-            actor_id = body.get('actors')
-            actor = Actor.query.filter(Actor.id == actor_id).one_or_none()
-            if actor is None:
-                abort(400)
-            movie.actors.append(actor)
-        movie.update()
+        try:
+            if ('title' in body):
+                title = body.get('title', None)
+                if title is None:
+                    abort(422)
+                movie.title = title
+            if ('release_date' in body):
+                release_date = body.get('release_date', None)
+                if release_date is None:
+                    abort(422)
+                movie.release_date = release_date
+            if ('actors' in body):
+                actor_id = body.get('actors')
+                actor = Actor.query.filter(Actor.id == actor_id).one_or_none()
+                if actor is None:
+                    abort(400)
+                movie.actors.append(actor)
+            movie.update()
+        except:
+            db.session.rollback()
+            abort(500)
+        finally:
+            db.session.close()
         return jsonify({
             'success': True,
             'movie': movie.format()
@@ -247,14 +287,18 @@ def create_app(test_config=None):
         # DELETE
     @app.route('/movies/<int:movie_id>', methods=['DELETE'])
     @requires_auth('delete:movies')
-    def delete_movie(jwt,movie_id):
+    def delete_movie(jwt, movie_id):
         movie = Movie.query.filter(Movie.id == movie_id).one_or_none()
 
         if movie is None:
             abort(404)
-
-        movie.delete()
-
+        try:
+            movie.delete()
+        except:
+            db.session.rollback()
+            abort(500)
+        finally:
+            db.session.close()
         return jsonify({
             'success': True,
             'deleted': movie_id
@@ -298,9 +342,18 @@ def create_app(test_config=None):
         return jsonify({
             'success': False,
             'error': error.status_code,
-            "description": error.error['description'],
+            "message": error.error['description'],
         }), error.status_code
 
+    # 5. 500
+
+    @app.errorhandler(500)
+    def serverError(error):
+        return jsonify({
+            'success': False,
+            'error': 500,
+            'message': 'Server error'
+        }), 500
     return app
 
 
