@@ -67,7 +67,7 @@ python manage.py db upgrade
 To run the API run the following commands
 
 ```bash
-export FLASK_APP=myapp
+export FLASK_APP=app
 export FLASK_ENV=development
 flask run
 ```
@@ -100,6 +100,26 @@ To test the endpoints with [Postman](https://getpostman.com).
 -   Base URL: if the flask app is being run locally use `https://localhost:5000/`.
     As for the hosted version `herkou url`
 -   Authentication: This version of the application requires Auth0 jwt that can acquired through /auth endpoint.
+-   RBAC:
+    -   Casting Assistant
+        -   get:actors
+        -   get:movies
+    -   Casting Director
+        -   get:actors
+        -   get:movies
+        -   post:actors
+        -   patch:actors
+        -   patch:movies
+        -   delete:actors
+    -   Exective Producer
+        -   get:actors
+        -   get:movies
+        -   post:actors
+        -   post:movies
+        -   patch:actors
+        -   patch:movies
+        -   delete:actors
+        -   delete:movies
 
 ### Error Handling
 
