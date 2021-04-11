@@ -140,6 +140,7 @@ When a request fails the API sends one of the following errors:
 -   403: Forbidden
 -   404: Resource Not Found
 -   422: Request unprocessable
+-   500: Server Error
 
 ### Endpoints
 
