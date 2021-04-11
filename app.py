@@ -118,14 +118,8 @@ def create_app(test_config=None):
         gender = body.get('gender', None)
         if name is None or age is None or gender is None:
             abort(422)
-        try:
-            actor = Actor(name=name, age=age, gender=gender)
-            actor.insert()
-        except:
-            db.session.rollback()
-            abort(500)
-        finally:
-            db.session.close()
+        actor = Actor(name=name, age=age, gender=gender)
+        actor.insert()
         return jsonify({
             'success': True,
             'actor': actor.format()
@@ -143,37 +137,30 @@ def create_app(test_config=None):
         body = request.get_json()
         if not('name' in body or 'age' in body or 'gender' in body or 'movies' in body):
             abort(400)
-
-        try:
-            if 'name' in body:
-                name = body.get('name', None)
-                if name is None:
-                    abort(422)
-                actor.name = name
-            if 'age' in body:
-                age = body.get('age', None)
-                if age is None:
-                    abort(422)
-                actor.age = age
-            if 'gender' in body:
-                gender = body.get('gender', None)
-                if gender is None:
-                    abort(422)
-                actor.gender = gender
-            if 'movies' in body:
-                movie_id = body.get('movies', None)
-                if movie_id is None:
-                    abort(422)
-                movie = Movie.query.filter(Movie.id == movie_id).one_or_none()
-                if movie is None:
-                    abort(400)
-                actor.movies.append(movie)
-            actor.update()
-        except:
-            db.session.rollback()
-            abort(500)
-        finally:
-            db.session.close()
+        if 'name' in body:
+            name = body.get('name', None)
+            if name is None:
+                abort(422)
+            actor.name = name
+        if 'age' in body:
+            age = body.get('age', None)
+            if age is None:
+                abort(422)
+            actor.age = age
+        if 'gender' in body:
+            gender = body.get('gender', None)
+            if gender is None:
+                abort(422)
+            actor.gender = gender
+        if 'movies' in body:
+            movie_id = body.get('movies', None)
+            if movie_id is None:
+                abort(422)
+            movie = Movie.query.filter(Movie.id == movie_id).one_or_none()
+            if movie is None:
+                abort(400)
+            actor.movies.append(movie)
+        actor.update()
         return jsonify({
             'success': True,
             'actor': actor.format()
@@ -230,14 +217,8 @@ def create_app(test_config=None):
             abort(400)
         title = body.get('title')
         release_date = body.get('release_date')
-        try:
-            movie = Movie(title=title, release_date=release_date)
-            movie.insert()
-        except:
-            db.session.rollback()
-            abort(500)
-        finally:
-            db.session.close()
+        movie = Movie(title=title, release_date=release_date)
+        movie.insert()
         return jsonify({
             'success': True,
             'movie': movie.format()
@@ -256,29 +237,23 @@ def create_app(test_config=None):
 
         if not('title' in body or 'release_date' in body or 'actors' in body):
             abort(400)
-        try:
-            if ('title' in body):
-                title = body.get('title', None)
-                if title is None:
-                    abort(422)
-                movie.title = title
-            if ('release_date' in body):
-                release_date = body.get('release_date', None)
-                if release_date is None:
-                    abort(422)
-                movie.release_date = release_date
-            if ('actors' in body):
-                actor_id = body.get('actors')
-                actor = Actor.query.filter(Actor.id == actor_id).one_or_none()
-                if actor is None:
-                    abort(400)
-                movie.actors.append(actor)
-            movie.update()
-        except:
-            db.session.rollback()
-            abort(500)
-        finally:
-            db.session.close()
+        if ('title' in body):
+            title = body.get('title', None)
+            if title is None:
+                abort(422)
+            movie.title = title
+        if ('release_date' in body):
+            release_date = body.get('release_date', None)
+            if release_date is None:
+                abort(422)
+            movie.release_date = release_date
+        if ('actors' in body):
+            actor_id = body.get('actors')
+            actor = Actor.query.filter(Actor.id == actor_id).one_or_none()
+            if actor is None:
+                abort(400)
+            movie.actors.append(actor)
+        movie.update()
         return jsonify({
             'success': True,
             'movie': movie.format()
