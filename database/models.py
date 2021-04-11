@@ -49,36 +49,14 @@ def db_drop_and_create_all():
 # ----------------------------------------------------------------------------#
 # Models.
 # ----------------------------------------------------------------------------#
-
-#  Association table
-#  ----------------------------------------------------------------
-movie_actors = Table(
-    'movie_actors',
-    db.metadata,
-    Column('movie_id', Integer, ForeignKey('movies.id'), primary_key=True),
-    Column('actor_id', Integer, ForeignKey('actors.id'), primary_key=True)
-)
+'''
+Extend the base Model class to add common methods
+'''
 
 
-#  Actors Model
-#  ----------------------------------------------------------------
-class Actor(db.Model):
-    __tablename__ = 'actors'
+class BaseClass(db.Model):
+    __abstract__ = True
 
-    # Table Columns
-    id = Column(Integer, primary_key=True)
-    name = Column(String(), nullable=False)
-    age = Column(Integer, nullable=False)
-    gender = Column(Enum('M', 'F',  name='gender_types'))
-
-    # Model functions
-    def __init__(self, name, age, gender):
-        self.name = name
-        self.age = age
-        self.gender = gender
-
-    def __repr__(self):
-        return f'< {self.id}: {self.name}, {self.age}, {self.gender}>'
     '''
     insert()
         inserts a new model into a database
@@ -109,6 +87,37 @@ class Actor(db.Model):
     def update(self):
         db.session.commit()
 
+
+#  Association table
+#  ----------------------------------------------------------------
+movie_actors = Table(
+    'movie_actors',
+    db.metadata,
+    Column('movie_id', Integer, ForeignKey('movies.id'), primary_key=True),
+    Column('actor_id', Integer, ForeignKey('actors.id'), primary_key=True)
+)
+
+
+#  Actors Model
+#  ----------------------------------------------------------------
+class Actor(BaseClass):
+    __tablename__ = 'actors'
+
+    # Table Columns
+    id = Column(Integer, primary_key=True)
+    name = Column(String(), nullable=False)
+    age = Column(Integer, nullable=False)
+    gender = Column(Enum('M', 'F',  name='gender_types'))
+
+    # Model functions
+    def __init__(self, name, age, gender):
+        self.name = name
+        self.age = age
+        self.gender = gender
+
+    def __repr__(self):
+        return f'< {self.id}: {self.name}, {self.age}, {self.gender}>'
+
     def format(self):
         return {
             'id': self.id,
@@ -121,7 +130,7 @@ class Actor(db.Model):
 
 #  Movies Model
 #  ----------------------------------------------------------------
-class Movie(db.Model):
+class Movie(BaseClass):
     __tablename__ = 'movies'
 
     # Table Columns
@@ -142,36 +151,6 @@ class Movie(db.Model):
 
     def __repr__(self):
         return f'<{self.id}: {self.title}, {self.release_date}>'
-
-    '''
-    insert()
-        inserts a new model into a database
-        the model must have a unique name
-        the model must have a unique id or null id
-    '''
-
-    def insert(self):
-        db.session.add(self)
-        db.session.commit()
-
-    '''
-    delete()
-        deletes a new model into a database
-        the model must exist in the database
-    '''
-
-    def delete(self):
-        db.session.delete(self)
-        db.session.commit()
-
-    '''
-    update()
-        updates a new model into a database
-        the model must exist in the database
-    '''
-
-    def update(self):
-        db.session.commit()
 
     def format(self):
         return {
